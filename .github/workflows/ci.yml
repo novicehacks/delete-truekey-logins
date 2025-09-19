@@ -205,11 +205,11 @@ jobs:
           safety-report.json
         retention-days: 30
 
-  # Build and Package
+  # Build and Package (Optional)
   build:
     name: Build Package
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    if: (github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main')) && (contains(github.event.head_commit.message, '[build]') || github.event_name == 'release')
     needs: [unit-tests, full-tests, security-scan]
     
     steps:
@@ -221,20 +221,38 @@ jobs:
       with:
         python-version: '3.11'
         
+    - name: Check for package files
+      id: check-package
+      run: |
+        if [ -f "pyproject.toml" ] || [ -f "setup.py" ]; then
+          echo "package=true" >> $GITHUB_OUTPUT
+        else
+          echo "package=false" >> $GITHUB_OUTPUT
+          echo "No package files found (pyproject.toml or setup.py)"
+        fi
+        
     - name: Install build dependencies
+      if: steps.check-package.outputs.package == 'true'
       run: |
         pip install build twine
         
     - name: Build package
+      if: steps.check-package.outputs.package == 'true'
       run: |
         python -m build
         
     - name: Upload build artifacts
+      if: steps.check-package.outputs.package == 'true'
       uses: actions/upload-artifact@v4
       with:
         name: dist-packages
         path: dist/
         retention-days: 7
+        
+    - name: Skip build (no package files)
+      if: steps.check-package.outputs.package == 'false'
+      run: |
+        echo "Skipping build step - this is a script project, not a Python package"
 
   # Notify on failure
   notify:
