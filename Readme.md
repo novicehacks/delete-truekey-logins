@@ -1,13 +1,13 @@
-# True Key Bulk Delete Script
+# TrueKey Bulk Delete Script
 
-This project provides a Python Selenium script to automate the deletion of all login entries in the True Key Chrome extension by switching the dashboard to list mode and then clicking the trash icons.
+This project provides a Python Selenium script to automate the deletion of all login entries in the TrueKey Chrome extension by switching the dashboard to list mode and then clicking the trash icons.
 
 ## Prerequisites
 
 - **Python 3** installed on your Mac (recommend Python 3.8+)
-- **Google Chrome** installed with the True Key extension and all logins already authenticated
-- **ChromeDriver** installed (matching your Chrome version)
+- **Google Chrome** installed with the TrueKey extension and all logins already authenticated
 - **Selenium** Python package installed
+- **macOS** (script is optimized for macOS Chrome profile paths)
 
 ## Setup Instructions
 
@@ -26,61 +26,89 @@ pip3 install selenium
 
 text
 
-### 4. Download and Install ChromeDriver
-- Check your Chrome version via `chrome://settings/help`.
-- Download the matching ChromeDriver from [chromedriver.chromium.org/downloads](https://chromedriver.chromium.org/downloads).
-- Move ChromeDriver to your PATH (e.g., `/usr/local/bin`):
-mv ~/Downloads/chromedriver /usr/local/bin/
-chmod +x /usr/local/bin/chromedriver
-
-text
-
-### 5. Find Your Chrome Profile Path
-- Open Chrome and go to `chrome://version/`.
-- Find and note your "Profile Path" (e.g., `/Users/youruser/Library/Application Support/Google/Chrome`).
-
-### 6. (Optional) Create a Python Virtual Environment
+### 4. (Optional) Create a Python Virtual Environment
 python3 -m venv venv
 source venv/bin/activate
 
 When done, you can deactivate with: deactivate
 text
 
-## Script Configuration
+## How the Script Works
 
-- Download or copy the script to a file, e.g., `delete_truekey_logins.py`.
-- **Edit the script**: Set the `chrome_profile_path` variable to match your Chrome profile path found above.  
-  Example:  
-chrome_profile_path = "/Users/youruser/Library/Application Support/Google/Chrome"
+The script uses an intelligent profile management system:
 
-text
-- By default, the script uses the "Default" profile directory. Edit if you use another profile.
+1. **Automatic Profile Creation**: On first run, creates a dedicated "TrueKey" profile by copying your Chrome profile
+2. **Profile Persistence**: Saves the TrueKey profile for reuse in subsequent runs (faster startup)
+3. **Automatic Chrome Management**: Closes any running Chrome processes automatically
+4. **Extension Preservation**: Copies your extensions (including TrueKey) to the dedicated profile
+
+### Profile Location
+The TrueKey profile is saved at:
+```
+/Users/[your-username]/Library/Application Support/Google/Chrome/TrueKey
+```
+
+### Refreshing the Profile
+To update the profile with new extensions or settings:
+```bash
+rm -rf "/Users/[your-username]/Library/Application Support/Google/Chrome/TrueKey"
+```
+Then run the script again - it will recreate the profile from your current Chrome setup.
 
 ## Execution Instructions
 
-1. Open a Terminal window.
-2. Change to your project/script directory.
-3. (Optional) Activate your Python virtual environment:
-source venv/bin/activate
+1. **Ensure TrueKey is set up** in your main Chrome browser with all logins authenticated
+2. Open a Terminal window
+3. Change to your project/script directory
+4. (Optional) Activate your Python virtual environment:
+   ```bash
+   source venv/bin/activate
+   ```
+5. Run the script:
+   ```bash
+   python3 delete-truekey-logins.py
+   ```
 
-text
-4. Run the script:
-python3 delete_truekey_logins.py
+### What Happens During Execution
 
-text
+1. **Automatic Chrome Management**: Script automatically closes any running Chrome processes
+2. **Profile Setup**: Creates or reuses the TrueKey profile (first run takes longer)
+3. **Extension Loading**: Opens Chrome with the TrueKey extension dashboard
+4. **User Verification**: Script pauses and asks you to verify the extension loaded properly
+   - Press **Enter** to continue if the TrueKey dashboard is visible
+   - Press **Ctrl+C** to exit if the extension didn't load
+5. **Automated Deletion**: Switches to list view and deletes all login entries
+6. **Cleanup**: Closes Chrome and displays completion message
 
 ## Notes and Troubleshooting
 
-- **Selenium can’t always automate Chrome extension UIs** due to security restrictions. This script works best when the extension is unlocked and active in your Chrome profile.
-- If Chrome shows `ERR_BLOCKED_BY_CLIENT` or a blank page, try:
- - Ensuring you’re running Selenium with your real user profile
- - Adding flags like `--disable-web-security` as shown in the script
- - Granting Accessibility Access to Terminal (System Preferences > Security & Privacy > Privacy > Accessibility)
-- BACK UP your True Key data before running! This action is irreversible.
-- You may need to update element selectors if the True Key UI changes in future versions.
+### Common Issues
+
+- **"Chrome not reachable" error**: The script automatically handles this by creating a dedicated profile
+- **Extension not loading**: Make sure TrueKey is properly installed and authenticated in your main Chrome browser
+- **Profile conflicts**: The script uses a separate TrueKey profile to avoid conflicts with your main Chrome instance
+
+### If You Encounter Issues
+
+1. **Refresh the TrueKey profile**:
+   ```bash
+   rm -rf "/Users/[your-username]/Library/Application Support/Google/Chrome/TrueKey"
+   ```
+
+2. **Check Chrome installation**: Ensure Chrome is properly installed and updated
+
+3. **Verify TrueKey extension**: Make sure the TrueKey extension is installed and working in your main Chrome browser
+
+4. **Grant Accessibility Access**: If prompted, grant Terminal accessibility access in System Preferences > Security & Privacy > Privacy > Accessibility
+
+### Important Warnings
+
+- **BACK UP your TrueKey data** before running! This action is irreversible
+- The script will pause for user verification - this is normal and important for safety
+- You may need to update element selectors if the TrueKey UI changes in future versions
 
 ## Disclaimer
 
-Use this script at your own risk. It will permanently delete all login entries in your True Key vault!
+Use this script at your own risk. It will permanently delete all login entries in your TrueKey vault!
 
 ---
