@@ -1,0 +1,14 @@
+# Test dependencies for TrueKey Login Deleter Script
+
+# Core testing framework
+pytest>=7.0.0
+
+# Mocking and test utilities
+pytest-mock>=3.10.0
+pytest-cov>=4.0.0
+
+# Selenium for WebDriver mocking
+selenium>=4.0.0
+
+# Note: unittest.mock is part of Python standard library (Python 3.3+)
+# No separate package needed for unittest-mock

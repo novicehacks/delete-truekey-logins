@@ -1,0 +1,179 @@
+name: Full Test Suite
+
+# Run on pull requests and merges to main (comprehensive testing)
+on:
+  pull_request:
+    branches: ['main']
+  push:
+    branches: ['main']
+  workflow_dispatch:
+
+env:
+  TRUEKEY_EXTENSION_ID: "cpaibbcbodhimfnjnakiidgbpiehfgci"
+
+jobs:
+  full-tests:
+    name: Full Test Suite
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.11', '3.12']
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        exclude:
+          # Reduce CI time by excluding some combinations
+          - python-version: '3.9'
+            os: windows-latest
+          - python-version: '3.12'
+            os: macos-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements-test.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+          
+    - name: Install system dependencies (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y xvfb chromium-browser
+        
+    - name: Install system dependencies (macOS)
+      if: runner.os == 'macOS'
+      run: |
+        brew install --cask chromedriver
+        
+    - name: Install system dependencies (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        choco install chromedriver -y
+        
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements-test.txt
+        
+    - name: Run full test suite with coverage
+      run: |
+        python -m pytest test_delete_truekey_logins.py \
+          --cov=. \
+          --cov-report=xml \
+          --cov-report=html \
+          --junitxml=test-results/junit.xml \
+          --verbose
+          
+    - name: Upload test coverage to Codecov
+      uses: codecov/codecov-action@v3
+      if: matrix.python-version == '3.11' && matrix.os == 'ubuntu-latest'
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+        
+    - name: Upload test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: test-results-${{ matrix.python-version }}-${{ matrix.os }}
+        path: |
+          test-results/
+          htmlcov/
+          coverage.xml
+          *.log
+        retention-days: 30
+        
+    - name: Upload coverage reports
+      uses: actions/upload-artifact@v3
+      if: matrix.python-version == '3.11' && matrix.os == 'ubuntu-latest'
+      with:
+        name: coverage-report
+        path: htmlcov/
+        retention-days: 30
+
+  # Code Quality Checks
+  code-quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install linting tools
+      run: |
+        pip install flake8 black isort bandit safety
+        
+    - name: Check code formatting
+      run: |
+        black --check --diff .
+        
+    - name: Check import sorting
+      run: |
+        isort --check-only --diff .
+        
+    - name: Check code style
+      run: |
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        
+    - name: Run security scan
+      run: |
+        bandit -r . -f json -o bandit-report.json || true
+        safety check --json --output safety-report.json || true
+        
+    - name: Upload quality reports
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: quality-reports
+        path: |
+          bandit-report.json
+          safety-report.json
+        retention-days: 30
+
+  # Build and Package
+  build:
+    name: Build Package
+    runs-on: ubuntu-latest
+    needs: [full-tests, code-quality]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install build dependencies
+      run: |
+        pip install build twine
+        
+    - name: Build package
+      run: |
+        python -m build
+        
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: dist-packages
+        path: dist/
+        retention-days: 7

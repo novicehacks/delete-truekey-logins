@@ -19,3 +19,24 @@ venv/
 chrome_profile_copy_/
 chrome_profile_copy_*/
 chrome_profile_copy_*/
+
+# Test artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# Temporary test files
+/tmp/test_*
+test_chrome_profile/
+mock_profile_*
+
+# VSCode ignore
+.vscode/
+.vscode/*
+.vscode/*/*

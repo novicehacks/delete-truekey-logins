@@ -1,0 +1,255 @@
+name: CI/CD Pipeline
+
+on:
+  # Run on all pushes to any branch
+  push:
+    branches: ['*']
+  # Run on pull requests to main
+  pull_request:
+    branches: ['main']
+  # Allow manual triggering
+  workflow_dispatch:
+
+env:
+  # Extension ID for testing (can be overridden in repository secrets)
+  TRUEKEY_EXTENSION_ID: "cpaibbcbodhimfnjnakiidgbpiehfgci"
+
+jobs:
+  # Unit Tests - Run on all commits (fast, basic tests)
+  unit-tests:
+    name: Unit Tests (All Commits)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    
+    strategy:
+      matrix:
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements-test.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+          
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y xvfb
+        
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements-test.txt
+        
+    - name: Run unit tests (basic functionality)
+      run: |
+        python3 simple_test_runner.py
+        
+    - name: Upload unit test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: unit-test-results-python-${{ matrix.python-version }}
+        path: |
+          test-results/
+          *.log
+        retention-days: 7
+
+  # Full Tests - Run on PR merges to main (comprehensive testing)
+  full-tests:
+    name: Full Test Suite (PR Merges)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.11', '3.12']
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        exclude:
+          # Exclude some combinations to reduce CI time
+          - python-version: '3.9'
+            os: windows-latest
+          - python-version: '3.12'
+            os: macos-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements-test.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+          
+    - name: Install system dependencies (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y xvfb chromium-browser
+        
+    - name: Install system dependencies (macOS)
+      if: runner.os == 'macOS'
+      run: |
+        brew install --cask chromedriver
+        
+    - name: Install system dependencies (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        choco install chromedriver -y
+        
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements-test.txt
+        
+    - name: Run full test suite with coverage
+      run: |
+        python -m pytest test_delete_truekey_logins.py \
+          --cov=. \
+          --cov-report=xml \
+          --cov-report=html \
+          --junitxml=test-results/junit.xml \
+          --verbose
+          
+    - name: Run linting checks
+      run: |
+        # Install additional linting tools
+        pip install flake8 black isort
+        
+        # Check code formatting
+        black --check --diff .
+        
+        # Check import sorting
+        isort --check-only --diff .
+        
+        # Check code style
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        
+    - name: Upload test coverage to Codecov
+      uses: codecov/codecov-action@v3
+      if: matrix.python-version == '3.11' && matrix.os == 'ubuntu-latest'
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+        
+    - name: Upload test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: test-results-${{ matrix.python-version }}-${{ matrix.os }}
+        path: |
+          test-results/
+          htmlcov/
+          coverage.xml
+          *.log
+        retention-days: 30
+        
+    - name: Upload coverage reports
+      uses: actions/upload-artifact@v3
+      if: matrix.python-version == '3.11' && matrix.os == 'ubuntu-latest'
+      with:
+        name: coverage-report
+        path: htmlcov/
+        retention-days: 30
+
+  # Security Scanning
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install security scanning tools
+      run: |
+        pip install bandit safety
+        
+    - name: Run bandit security scan
+      run: |
+        bandit -r . -f json -o bandit-report.json || true
+        
+    - name: Run safety check for known vulnerabilities
+      run: |
+        safety check --json --output safety-report.json || true
+        
+    - name: Upload security reports
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: security-reports
+        path: |
+          bandit-report.json
+          safety-report.json
+        retention-days: 30
+
+  # Build and Package
+  build:
+    name: Build Package
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    needs: [unit-tests, full-tests, security-scan]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install build dependencies
+      run: |
+        pip install build twine
+        
+    - name: Build package
+      run: |
+        python -m build
+        
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: dist-packages
+        path: dist/
+        retention-days: 7
+
+  # Notify on failure
+  notify:
+    name: Notify on Failure
+    runs-on: ubuntu-latest
+    if: failure() && github.event_name == 'pull_request'
+    needs: [unit-tests, full-tests, security-scan, build]
+    
+    steps:
+    - name: Notify failure
+      run: |
+        echo "CI/CD pipeline failed. Please check the logs."
+        # Add notification logic here (Slack, email, etc.)

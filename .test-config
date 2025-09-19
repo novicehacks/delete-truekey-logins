@@ -1,0 +1,22 @@
+# Test configuration for TrueKey Login Deleter Script
+
+# Test environment settings
+TEST_ENVIRONMENT=true
+MOCK_CHROME=true
+SKIP_BROWSER_TESTS=false
+
+# Test data paths
+TEST_PROFILE_PATH=/tmp/test_chrome_profile
+TEST_EXTENSION_ID=testextensionid123456789012345678901
+
+# Test timeouts (in seconds)
+TEST_TIMEOUT=30
+BROWSER_TIMEOUT=60
+
+# Test markers to include/exclude
+INCLUDE_MARKERS=unit,integration,mock
+EXCLUDE_MARKERS=slow,external
+
+# Coverage settings
+COVERAGE_THRESHOLD=80
+COVERAGE_REPORT_FORMAT=html,term

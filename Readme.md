@@ -1,5 +1,9 @@
 # TrueKey Bulk Delete Script
 
+[![Unit Tests](https://github.com/your-username/delete-truekey-logins/workflows/Unit%20Tests/badge.svg)](https://github.com/your-username/delete-truekey-logins/actions/workflows/unit-tests.yml)
+[![Full Test Suite](https://github.com/your-username/delete-truekey-logins/workflows/Full%20Test%20Suite/badge.svg)](https://github.com/your-username/delete-truekey-logins/actions/workflows/full-tests.yml)
+[![Code Coverage](https://codecov.io/gh/your-username/delete-truekey-logins/branch/main/graph/badge.svg)](https://codecov.io/gh/your-username/delete-truekey-logins)
+
 This project provides a Python Selenium script to automate the deletion of all login entries in the TrueKey Chrome extension by switching the dashboard to list mode and then clicking the trash icons.
 
 ## Prerequisites
@@ -132,6 +136,57 @@ cpaibbcbodhimfnjnakiidgbpiehfgci
 - **BACK UP your TrueKey data** before running! This action is irreversible
 - The script will pause for user verification - this is normal and important for safety
 - You may need to update element selectors if the TrueKey UI changes in future versions
+
+## CI/CD and Testing
+
+This project includes comprehensive GitHub Actions workflows for continuous integration and testing:
+
+### 🧪 Testing Strategy
+- **Unit Tests**: Fast basic tests run on every commit (2-3 minutes)
+- **Full Test Suite**: Comprehensive testing on PR merges to main (5-10 minutes)
+- **Cross-Platform**: Tests on Ubuntu, Windows, and macOS
+- **Multi-Version**: Tests on Python 3.9, 3.11, and 3.12
+
+### 🔍 Code Quality
+- **Black**: Code formatting checks
+- **isort**: Import sorting validation  
+- **flake8**: Code style and error detection
+- **bandit**: Security vulnerability scanning
+- **safety**: Known vulnerability checks
+
+### 📊 Coverage Reporting
+- Code coverage reports with pytest-cov
+- HTML coverage reports uploaded as artifacts
+- Codecov integration for coverage tracking
+
+### 🚀 Quick Development Setup
+```bash
+# Run the development setup script
+./setup-dev.sh
+
+# Or manual setup
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements-test.txt
+python3 simple_test_runner.py
+```
+
+### 📋 Available Test Commands
+```bash
+# Basic tests (no external dependencies)
+python3 simple_test_runner.py
+
+# Full test suite (requires pytest)
+python3 -m pytest test_delete_truekey_logins.py -v
+
+# Tests with coverage
+python3 -m pytest test_delete_truekey_logins.py --cov=. --cov-report=html
+
+# Code quality checks
+black . && isort . && flake8 . && bandit -r .
+```
+
+For detailed CI/CD documentation, see [.github/workflows/README.md](.github/workflows/README.md)
 
 ## Disclaimer
 

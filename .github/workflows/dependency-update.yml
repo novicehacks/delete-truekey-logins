@@ -1,0 +1,49 @@
+name: Dependency Update Check
+
+# Run weekly to check for dependency updates
+on:
+  schedule:
+    - cron: '0 0 * * 1'  # Every Monday at midnight UTC
+  workflow_dispatch:
+
+jobs:
+  dependency-check:
+    name: Check for Dependency Updates
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install dependency check tools
+      run: |
+        pip install pip-review safety
+        
+    - name: Check for outdated packages
+      run: |
+        echo "## 📦 Outdated Packages" >> $GITHUB_STEP_SUMMARY
+        pip-review --local --auto || true
+        pip-review --local >> $GITHUB_STEP_SUMMARY || echo "No outdated packages found" >> $GITHUB_STEP_SUMMARY
+        
+    - name: Check for security vulnerabilities
+      run: |
+        echo "## 🔒 Security Check" >> $GITHUB_STEP_SUMMARY
+        safety check --json --output safety-report.json || true
+        if [ -f safety-report.json ]; then
+          echo "Security vulnerabilities found. Check the safety report." >> $GITHUB_STEP_SUMMARY
+        else
+          echo "✅ No security vulnerabilities found" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+    - name: Upload security report
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: security-report-${{ github.run_number }}
+        path: safety-report.json
+        retention-days: 30
