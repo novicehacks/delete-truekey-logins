@@ -123,12 +123,7 @@ jobs:
         
     - name: Run full test suite with coverage
       run: |
-        python -m pytest test_delete_truekey_logins.py \
-          --cov=. \
-          --cov-report=xml \
-          --cov-report=html \
-          --junitxml=test-results/junit.xml \
-          --verbose
+        python -m pytest test_delete_truekey_logins.py --cov=. --cov-report=xml --cov-report=html --junitxml=test-results/junit.xml --verbose
           
     - name: Run linting checks
       run: |
