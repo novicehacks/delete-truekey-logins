@@ -1,8 +1,8 @@
 # TrueKey Bulk Delete Script
 
-[![Unit Tests](https://github.com/your-username/delete-truekey-logins/workflows/Unit%20Tests/badge.svg)](https://github.com/your-username/delete-truekey-logins/actions/workflows/unit-tests.yml)
-[![Full Test Suite](https://github.com/your-username/delete-truekey-logins/workflows/Full%20Test%20Suite/badge.svg)](https://github.com/your-username/delete-truekey-logins/actions/workflows/full-tests.yml)
-[![Code Coverage](https://codecov.io/gh/your-username/delete-truekey-logins/branch/main/graph/badge.svg)](https://codecov.io/gh/your-username/delete-truekey-logins)
+[![Unit Tests](https://github.com/novicehacks/delete-truekey-logins/workflows/Unit%20Tests/badge.svg)](https://github.com/novicehacks/delete-truekey-logins/actions/workflows/unit-tests.yml)
+[![Full Test Suite](https://github.com/novicehacks/delete-truekey-logins/workflows/Full%20Test%20Suite/badge.svg)](https://github.com/novicehacks/delete-truekey-logins/actions/workflows/full-tests.yml)
+[![Code Coverage](https://codecov.io/gh/novicehacks/delete-truekey-logins/branch/main/graph/badge.svg)](https://codecov.io/gh/novicehacks/delete-truekey-logins)
 
 This project provides a Python Selenium script to automate the deletion of all login entries in the TrueKey Chrome extension by switching the dashboard to list mode and then clicking the trash icons.
 
@@ -49,13 +49,13 @@ The script uses an intelligent profile management system:
 ### Profile Location
 The TrueKey profile is saved at:
 ```
-/Users/[your-username]/Library/Application Support/Google/Chrome/TrueKey
+/Users/[novicehacks]/Library/Application Support/Google/Chrome/TrueKey
 ```
 
 ### Refreshing the Profile
 To update the profile with new extensions or settings:
 ```bash
-rm -rf "/Users/[your-username]/Library/Application Support/Google/Chrome/TrueKey"
+rm -rf "/Users/[novicehacks]/Library/Application Support/Google/Chrome/TrueKey"
 ```
 Then run the script again - it will recreate the profile from your current Chrome setup.
 
@@ -122,7 +122,7 @@ cpaibbcbodhimfnjnakiidgbpiehfgci
 
 1. **Refresh the TrueKey profile**:
    ```bash
-   rm -rf "/Users/[your-username]/Library/Application Support/Google/Chrome/TrueKey"
+   rm -rf "/Users/[novicehacks]/Library/Application Support/Google/Chrome/TrueKey"
    ```
 
 2. **Check Chrome installation**: Ensure Chrome is properly installed and updated
