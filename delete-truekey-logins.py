@@ -18,10 +18,12 @@ import tempfile
 
 # --- Configuration ---
 # Use your existing Chrome profile to access the TrueKey extension
-chrome_profile_path = "/Users/sharath/Library/Application Support/Google/Chrome"
+import getpass
+username = getpass.getuser()  # Gets current username dynamically
+chrome_profile_path = f"/Users/{username}/Library/Application Support/Google/Chrome"
 
 # TrueKey profile directory (permanent location for the copied profile)
-truekey_profile_dir = "/Users/sharath/Library/Application Support/Google/Chrome/TrueKey"
+truekey_profile_dir = f"/Users/{username}/Library/Application Support/Google/Chrome/TrueKey"
 
 # Check if Chrome is running and attempt to close it
 import subprocess
@@ -181,5 +183,5 @@ except Exception as e:
     print(f"Error during cleanup: {e}")
 
 # Optional: Add a note about profile management
-print(f"\nNote: TrueKey profile is saved at: {truekey_profile_dir}")
+print(f"\nNote: TrueKey profile is saved at: /Users/[username]/Library/Application Support/Google/Chrome/TrueKey")
 print("To refresh the profile with latest extensions, delete this directory and run the script again.")
