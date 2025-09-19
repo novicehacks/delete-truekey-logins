@@ -1,0 +1,21 @@
+# Python Ignore
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pyw
+*.pyz
+
+# OS Ignore
+.DS_Store
+.DS_Store?
+.DS_Store?
+
+# Python venv ignore
+venv/
+.venv/
+
+# Chrome profile ignore
+chrome_profile_copy_/
+chrome_profile_copy_*/
+chrome_profile_copy_*/
