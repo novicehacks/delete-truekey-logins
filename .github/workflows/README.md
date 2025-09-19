@@ -50,9 +50,9 @@ This repository uses GitHub Actions for continuous integration and deployment. T
 Add these badges to your README.md:
 
 ```markdown
-[![Unit Tests](https://github.com/your-username/delete-truekey-logins/workflows/Unit%20Tests/badge.svg)](https://github.com/your-username/delete-truekey-logins/actions/workflows/unit-tests.yml)
-[![Full Test Suite](https://github.com/your-username/delete-truekey-logins/workflows/Full%20Test%20Suite/badge.svg)](https://github.com/your-username/delete-truekey-logins/actions/workflows/full-tests.yml)
-[![Code Coverage](https://codecov.io/gh/your-username/delete-truekey-logins/branch/main/graph/badge.svg)](https://codecov.io/gh/your-username/delete-truekey-logins)
+[![Unit Tests](https://github.com/novicehacks/delete-truekey-logins/workflows/Unit%20Tests/badge.svg)](https://github.com/novicehacks/delete-truekey-logins/actions/workflows/unit-tests.yml)
+[![Full Test Suite](https://github.com/novicehacks/delete-truekey-logins/workflows/Full%20Test%20Suite/badge.svg)](https://github.com/novicehacks/delete-truekey-logins/actions/workflows/full-tests.yml)
+[![Code Coverage](https://codecov.io/gh/novicehacks/delete-truekey-logins/branch/main/graph/badge.svg)](https://codecov.io/gh/novicehacks/delete-truekey-logins)
 ```
 
 ## Local Development
