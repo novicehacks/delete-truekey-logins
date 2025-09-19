@@ -69,6 +69,32 @@ Then run the script again - it will recreate the profile from your current Chrom
    python3 delete-truekey-logins.py
    ```
 
+### Extension ID Configuration
+
+The script uses a default TrueKey extension ID (`cpaibbcbodhimfnjnakiidgbpiehfgci`), but you can configure it if needed:
+
+> **📋 Need to find your extension ID?** See the [Finding Your Extension ID Guide](FINDING-EXTENSION-ID.md) for detailed instructions.
+
+#### Option 1: Environment Variable
+```bash
+export TRUEKEY_EXTENSION_ID=your_extension_id_here
+python3 delete-truekey-logins.py
+```
+
+#### Option 2: Command Line Argument
+```bash
+python3 delete-truekey-logins.py --extension-id your_extension_id_here
+```
+
+### Quick Extension ID Reference
+
+For detailed instructions on finding your TrueKey extension ID, see the **[Finding Your Extension ID Guide](FINDING-EXTENSION-ID.md)**.
+
+**Default TrueKey Extension ID:**
+```
+cpaibbcbodhimfnjnakiidgbpiehfgci
+```
+
 ### What Happens During Execution
 
 1. **Automatic Chrome Management**: Script automatically closes any running Chrome processes
